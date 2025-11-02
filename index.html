@@ -53,7 +53,7 @@
     #view-home{
       position:relative;
       width:100%;height:100vh;
-      background:url("backgrounfd.png") center center/cover no-repeat;
+      background:url("public/backgroundf.png") center center/cover no-repeat;
       display:flex;align-items:center;justify-content:center;
       overflow:hidden;
     }
@@ -250,9 +250,9 @@
   <section id="view-home" class="screen">
     <div class="overlay"></div>
     <div class="menu">
-      <button class="img-btn" id="go-cinema"><img src="movie.png" alt="영화관"></button>
-      <button class="img-btn" id="go-room"><img src="mireasaico.png" alt="미래편지"></button>
-      <button class="img-btn" id="go-polaroid"><img src="pol.png" alt="폴라로이드"></button>
+<button class="img-btn" id="go-cinema"><img src="public/movie.png" alt="영화관"></button>
+<button class="img-btn" id="go-room"><img src="public/mireasaico.png" alt="미래편지"></button>
+<button class="img-btn" id="go-polaroid"><img src="public/pol.png" alt="폴라로이드"></button>
     </div>
   </section>
 
@@ -277,7 +277,7 @@
     </div>
 
     <div id="room-success" class="hidden">
-      <img src="Group 2085667473.png" alt="편지가 잘 보내졌어요. 2026년에 작성한 이메일로 보내드릴게요!" style="max-width:340px;width:80vw;display:block;margin:0 auto 18px;">
+      <img src="public/Group 2085667473.png" alt="편지가 잘 보내졌어요. 2026년에 작성한 이메일로 보내드릴게요!" style="max-width:340px;width:80vw;display:block;margin:0 auto 18px;">
       <button id="room-success-home" class="btn-soft btn-sm">홈으로</button>
     </div>
   </section>
@@ -291,7 +291,7 @@
 
       <div class="overlay-frame">
         <img class="frame-img" src="Group 2085667384.png" alt="폴라로이드 프레임">
-        <video id="frontCamSmall" class="frontcam-small" autoplay playsinline muted></video>
+        <video id="frontCamSmall" class="public/frontcam-small" autoplay playsinline muted></video>
         <div class="countdown-msg" id="countdownText">5</div>
       </div>
 
@@ -306,7 +306,7 @@
     <div id="polaroid-result-stage" class="polaroid-stage hidden">
       <div class="result-frame-wrap">
         <div class="result-frame" style="position:relative;display:inline-block;">
-          <img class="result-frame-img" src="Group 2085667457.png" alt="결과 프레임" style="display:block;margin:0 auto;">
+          <img class="result-frame-img" src="public/Group 2085667457.png" alt="결과 프레임" style="display:block;margin:0 auto;">
 
           <!-- 사진 -->
           <div id="resultPhotoSpot"
@@ -443,7 +443,7 @@
     // CINEMA 데이터
     const QUESTIONS = [
       {
-        video:"1.mp4",
+        video:"public/1.mp4",
         scenarioTitle:"시나리오 1: 친구가 약속을 어겼을 때",
         description:`친구와의 점심약속 날 친구가 약속 시간에 늦거나 깜빡했습니다.
 이때 당신은 어떻게 반응하겠습니까?`,
@@ -456,7 +456,7 @@
         ]
       },
       {
-        video:"2.mp4",
+        video:"public/2.mp4",
         scenarioTitle:"시나리오 2: 새로운 프로젝트",
         description:`처음 맡는 중요한 프로젝트를 책임지게 되었습니다.
 이때 당신은 어떻게 반응하겠습니까?`,
@@ -469,7 +469,7 @@
         ]
       },
       {
-        video:"3.mp4",
+        video:"public/3.mp4",
         scenarioTitle:"시나리오 3: 친구가 힘들어할 때",
         description:`친한 친구가 갑자기 힘든 일이 생겨 많이 다운돼 있습니다.
 이때 당신은 어떻게 반응하겠습니까?`,
@@ -482,7 +482,7 @@
         ]
       },
       {
-        video:"4.mp4",
+        video:"public/4.mp4",
         scenarioTitle:"시나리오 4: 중요한 결정",
         description:`최근 눈여겨보던 주식이 큰 변동을 보이고 있습니다. 지금 사면 이득일 수도, 손해일 수도 있는 선택이 눈앞에 있습니다.
 이때 당신은 어떻게 하겠습니까?`,
@@ -495,7 +495,7 @@
         ]
       },
       {
-        video:"5.mp4",
+        video:"public/5.mp4",
         scenarioTitle:"시나리오 5: 첫 모임",
         description:`처음 간 모임에서 회식을 하게 되었습니다.
 이때 당신은?`,
@@ -508,7 +508,7 @@
         ]
       },
       {
-        video:"6.mp4",
+        video:"public/6.mp4",
         scenarioTitle:"시나리오 6: 룸메와 갈등",
         description:`룸메이트와 생활 습관이 달라 갈등이 생겼습니다.
 어떻게 할까요?`,
@@ -521,7 +521,7 @@
         ]
       },
       {
-        video:"7.mp4",
+        video:"public/7.mp4",
         scenarioTitle:"시나리오 7: 실패했을 때",
         description:`열심히 준비한 일을 실패했습니다.
 이때 당신은?`,
@@ -534,7 +534,7 @@
         ]
       },
       {
-        video:"8.mp4",
+        video:"public/8.mp4",
         scenarioTitle:"시나리오 8: 여행 중 위기",
         description:`친구들과의 해외여행 중 예약이 누락되어 버렸습니다!
 이때 당신은 어떻게 반응하겠습니까?`,
@@ -547,7 +547,7 @@
         ]
       },
       {
-        video:"9.mp4",
+        video:"public/9.mp4",
         scenarioTitle:"시나리오 9: 주말",
         description:`바쁜 한 주가 끝났습니다. 주말에 하고 싶은 건?`,
         choices:[
