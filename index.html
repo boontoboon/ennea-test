@@ -425,14 +425,14 @@
       }
 
       // 여기서 구글시트로 보내고 싶으면 이거 주석 풀어서 script url 넣으면 됨
-      /*
-      fetch("https://script.google.com/macros/s/여기에1IVWQDvzsBU5kP0pvWpDTiu45HX1a4s6H6MR764C_XS0URL/exec", {
+      
+      fetch("https://script.google.com/macros/s/AKfycbyegzL4f8HqIUOnRukuEzhbVMl0iub_jI3NaHOSkQ-5LUpk13tJU8-e5B5mmG8jBnN7ug/exec", {
         method:"POST",
         mode:"no-cors",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({email:emailVal,letter:letterVal,createdAt:new Date().toISOString()})
       });
-      */
+      
 
       roomCompose.classList.add("hidden");
       roomSuccess.classList.remove("hidden");
