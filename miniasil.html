@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>이십춘기 시나리오 테스트</title>
+
+  <style>
+    /* ========== 공통 ========== */
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:system-ui,-apple-system,"Apple SD Gothic Neo",Roboto,sans-serif;background:#fff;}
+    .screen{width:100%;min-height:100vh;}
+    .hidden{display:none !important;}
+
+    /* 버튼 공통 */
+    .btn-row{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      align-items:center;
+    }
+    .btn-pill{
+      border:none;
+      border-radius:999px;
+      background:linear-gradient(180deg,#ff9a60 0%,#ff7c4f 100%);
+      color:#fff;
+      font-weight:600;
+      padding:10px 26px;
+      box-shadow:0 6px 14px rgba(255,124,79,0.38);
+      cursor:pointer;
+      transition:transform .15s ease;
+    }
+    .btn-pill:hover{transform:translateY(-2px);}
+    .btn-soft{
+      border:none;
+      border-radius:999px;
+      background:linear-gradient(180deg,#fff2d5 0%,#ffd6a5 100%);
+      color:#6a3b0b;
+      font-weight:600;
+      padding:10px 22px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.12);
+      cursor:pointer;
+      transition:transform .15s ease;
+    }
+    .btn-soft:hover{transform:translateY(-2px);}
+    .btn-sm{
+      padding:7px 16px;
+      font-size:13px;
+      box-shadow:0 3px 8px rgba(0,0,0,0.1);
+    }
+
+    /* ========== HOME ========== */
+    #view-home{
+      position:relative;
+      width:100%;height:100vh;
+      background:url("backgrounfd.png") center center/cover no-repeat;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    #view-home .overlay{
+      position:absolute;inset:0;background:rgba(0,0,0,0.45);pointer-events:none;
+    }
+    #view-home .menu{
+      position:relative;z-index:2;display:flex;gap:40px;
+    }
+    #view-home .img-btn{
+      background:none;border:none;padding:0;cursor:pointer;transition:transform .15s ease;
+    }
+    #view-home .img-btn img{
+      width:182.33px;height:196px;object-fit:cover;border-radius:14px;
+      box-shadow:0 8px 16px rgba(0,0,0,0.45);
+    }
+    #view-home .img-btn:hover{transform:translateY(-6px);}
+
+    /* ========== ROOM (미래편지) ========== */
+    #view-room{
+      position:relative;
+      width:100%;min-height:100vh;
+      background:#fff7ef;
+      display:flex;justify-content:center;align-items:center;
+      padding:60px 16px 120px;
+    }
+    /* 테이블 배경 뺐음, 다시 쓰고 싶으면 주석 풀기
+    .room-table-bg{ ... }
+    */
+    .room-stage{
+      position:relative;z-index:2;
+      width:100%;max-width:640px;
+      display:flex;flex-direction:column;gap:26px;align-items:center;
+    }
+    .room-title{
+      font-size:1.25rem;font-weight:700;color:#5A2B88;text-align:center;
+    }
+    .room-card{
+      width:100%;background:#fff2d5;border-radius:32px;
+      border:4px solid rgba(255,255,255,.7);
+      box-shadow:0 12px 30px rgba(0,0,0,.04);
+    }
+    .room-email-wrap{
+      height:72px;display:flex;justify-content:center;align-items:center;
+    }
+    .room-email-input{
+      width:85%;height:40px;border:none;background:rgba(255,255,255,.75);
+      border-radius:999px;text-align:center;font-size:14px;outline:none;
+    }
+    .room-email-input::placeholder{color:#999;font-style:italic;}
+    .room-letter-wrap{min-height:280px;padding:22px 0 26px;}
+    .room-letter-title{text-align:center;color:#c88d25;margin-bottom:14px;}
+    .room-letter-input{
+      width:88%;min-height:210px;border:none;resize:none;outline:none;
+      background:rgba(255,255,255,.45);border-radius:26px;
+      margin:0 auto;display:block;padding:12px 14px;
+      font-size:.9rem;line-height:1.5;color:#333;
+    }
+    #room-success{text-align:center;position:relative;z-index:2;}
+
+    /* ========== CINEMA (에니어그램) ========== */
+    #view-cinema{
+      position:relative;width:100%;min-height:100vh;
+      background:radial-gradient(circle at top,#ffe4be 0%,#fff6e7 45%,#ffe3d7 100%);
+      display:flex;justify-content:center;align-items:center;
+      padding:28px 16px;
+    }
+    .cinema-wrap{
+      width:100%;max-width:920px;
+      background:#fffaf5;border:3px solid rgba(255,141,108,.12);border-radius:34px;
+      box-shadow:0 20px 60px rgba(255,140,82,.28);
+      padding:20px 20px 16px;display:flex;flex-direction:column;gap:16px;
+    }
+    .cinema-topbar{display:flex;justify-content:space-between;align-items:center;}
+    .cinema-step-badge{
+      background:#fff;border:1px solid rgba(255,141,108,.3);
+      border-radius:999px;padding:6px 14px;
+      font-size:12px;color:#ff783f;font-weight:600;box-shadow:0 4px 14px rgba(255,141,108,.25);
+    }
+    .cinema-warning{
+      background:#fff;border:1px dashed rgba(255,141,108,.5);
+      border-radius:20px;padding:10px 14px;font-size:12px;color:#c26b30;
+    }
+    .cinema-video{background:#ffe5c9;border-radius:24px;overflow:hidden;border:2px solid rgba(255,205,145,.7);}
+    .cinema-video video{width:100%;display:block;}
+    .cinema-question-card{
+      background:#fff;border-radius:26px;border:2px solid rgba(255,141,108,.12);
+      box-shadow:0 12px 35px rgba(255,140,82,.1);
+      padding:16px 16px 12px;
+    }
+    .cinema-scenario{font-weight:700;color:#ff894f;margin-bottom:6px;}
+    .cinema-question{font-size:13px;color:#444;line-height:1.5;}
+    .cinema-note{font-size:12px;color:#d7642b;margin-top:8px;}
+    .cinema-choices{display:grid;gap:10px;}
+    .choice-btn{
+      background:linear-gradient(180deg,#fff 0%,#ffe9da 100%);
+      border:2px solid rgba(255,141,108,.35);border-radius:18px;
+      padding:10px 12px 10px 42px;
+      text-align:left;font-size:13px;color:#453729;cursor:pointer;
+      position:relative;transition:transform .15s ease;
+    }
+    .choice-btn::before{
+      content:"";position:absolute;left:14px;top:50%;transform:translateY(-50%);
+      width:20px;height:20px;border-radius:8px;background:#fff;
+      border:2px solid rgba(255,141,108,.4);box-shadow:inset 0 1px 3px rgba(0,0,0,.1);
+    }
+    .choice-btn.selected{
+      background:linear-gradient(180deg,#fff6de 0%,#ffe1c4 100%);
+      border:2px solid rgba(255,118,83,.7);
+      box-shadow:0 8px 20px rgba(255,118,83,.25);
+      transform:translateY(-2px);
+    }
+    .choice-btn.selected::before{background:#ff955b;}
+    .cinema-nav-buttons{display:flex;justify-content:center;gap:12px;margin-top:8px;}
+    .cinema-progress-txt{text-align:center;font-size:12px;color:#ff7b3f;}
+
+    /* ========== RESULT (레이더) ========== */
+    #view-result{
+      position:relative;width:100%;min-height:100vh;
+      background:radial-gradient(circle,#fff2e3 0%,#ffd3cb 45%,#ffb7bc 100%);
+      display:flex;justify-content:center;align-items:center;padding:30px 16px;
+    }
+    .result-wrap{
+      background:rgba(255,255,255,.7);border:3px solid rgba(255,116,127,.2);
+      border-radius:32px;box-shadow:0 20px 50px rgba(255,138,146,.25);
+      padding:20px 20px 16px;text-align:center;max-width:780px;width:100%;
+    }
+    #enneaChart{background:rgba(255,255,255,.4);border-radius:20px;border:1px solid rgba(255,157,163,.3);}
+
+    /* ========== POLAROID ========== */
+    #view-polaroid{
+      position:relative;width:100%;height:100vh;
+      background:linear-gradient(180deg,#fff1e2 0%,#ffd6d0 100%);
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    .polaroid-stage{
+      position:relative;width:100%;height:100%;
+      display:flex;flex-direction:column;justify-content:flex-start;align-items:center;
+      text-align:center;padding:16px;padding-top:60px;
+    }
+    .backcam-full{
+      position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+      opacity:.3;filter:blur(2px);
+    }
+    .overlay-frame{position:relative;z-index:1;width:auto;max-width:90%;}
+    .frame-img{display:block;max-width:100%;height:auto;}
+    .frontcam-small{
+      position:absolute;left:30px;top:38px;width:252px;height:188px;
+      object-fit:cover;background:#000;border-radius:12px;border:2px solid rgba(255,255,255,.4);
+      z-index:2;
+    }
+    .countdown-msg{
+      position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.4);
+      border:1px solid rgba(255,255,255,.4);border-radius:8px;
+      padding:4px 8px;font-size:14px;color:#fff;z-index:3;
+      display:none;
+    }
+    .polaroid-hint{
+      position:static;margin-top:10px;
+      font-size:14px;color:#774d47;text-shadow:0 2px 8px rgba(255,255,255,.4);
+      z-index:2;
+    }
+
+    /* 촬영 후 화면 */
+    #polaroid-result-stage{justify-content:flex-start;padding-top:40px;}
+    .result-frame-wrap{position:relative;z-index:1;}
+    .result-photo-spot img{width:100%;height:100%;object-fit:cover;}
+
+    /* 반응형 */
+    @media (max-width:768px){
+      #view-home .menu{gap:14px;}
+      #view-home .img-btn img{width:150px;height:165px;}
+      #view-room{padding-top:32px;}
+      .room-card{border-width:3px;}
+      .cinema-wrap{max-height:none;}
+      #view-polaroid{align-items:flex-start;}
+    }
+    @media (max-width:480px){
+      #view-home{padding:20px 8px;}
+      #view-home .menu{gap:10px;}
+      #view-home .img-btn img{width:120px;height:130px;}
+      .room-letter-input{min-height:150px;}
+      .overlay-frame{max-width:330px;}
+      .frontcam-small{width:210px;height:150px;}
+      #enneaChart{width:280px;height:280px;}
+      #polaroid-result-stage .result-frame{transform:scale(0.9);transform-origin:top center;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HOME -->
+  <section id="view-home" class="screen">
+    <div class="overlay"></div>
+    <div class="menu">
+      <button class="img-btn" id="go-cinema"><img src="movie.png" alt="영화관"></button>
+      <button class="img-btn" id="go-room"><img src="mireasaico.png" alt="미래편지"></button>
+      <button class="img-btn" id="go-polaroid"><img src="pol.png" alt="폴라로이드"></button>
+    </div>
+  </section>
+
+  <!-- ROOM -->
+  <section id="view-room" class="screen hidden">
+    <div id="room-compose" class="room-stage">
+      <div class="room-title">미래의 나에게</div>
+
+      <div class="room-card room-email-wrap">
+        <input id="room-email-input" class="room-email-input" type="email" placeholder="실제 발송 될 수 있는 이메일을 작성해주세요">
+      </div>
+
+      <div class="room-card room-letter-wrap">
+        <div class="room-letter-title">편지를 적어주세요</div>
+        <textarea id="room-letter-input" class="room-letter-input" placeholder="2026년에 이메일로 다시 받게 될거예요! 지금의 감정, 상황, 다짐을 자유롭게 적어보세요 :)"></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button id="room-send-btn" class="btn-pill">보내기</button>
+        <button id="room-home-btn" class="btn-soft">홈으로</button>
+      </div>
+    </div>
+
+    <div id="room-success" class="hidden">
+      <img src="Group 2085667473.png" alt="편지가 잘 보내졌어요. 2026년에 작성한 이메일로 보내드릴게요!" style="max-width:340px;width:80vw;display:block;margin:0 auto 18px;">
+      <button id="room-success-home" class="btn-soft btn-sm">홈으로</button>
+    </div>
+  </section>
+
+  <!-- POLAROID -->
+  <section id="view-polaroid" class="screen hidden">
+
+    <!-- 촬영 전 -->
+    <div id="polaroid-live-stage" class="polaroid-stage">
+      <video id="backCamFull" class="backcam-full" autoplay playsinline muted></video>
+
+      <div class="overlay-frame">
+        <img class="frame-img" src="Group 2085667384.png" alt="폴라로이드 프레임">
+        <video id="frontCamSmall" class="frontcam-small" autoplay playsinline muted></video>
+        <div class="countdown-msg" id="countdownText">5</div>
+      </div>
+
+      <div class="polaroid-hint">카메라를 켜고 5초 후 자동 촬영됩니다 📸</div>
+
+      <button id="polaroid-start-btn" class="btn-pill" style="margin-top:16px;">카메라 켜기</button>
+
+      <button id="polaroid-live-home" class="btn-soft btn-sm" style="margin-top:14px;">홈으로</button>
+    </div>
+
+    <!-- 촬영 후 -->
+    <div id="polaroid-result-stage" class="polaroid-stage hidden">
+      <div class="result-frame-wrap">
+        <div class="result-frame" style="position:relative;display:inline-block;">
+          <img class="result-frame-img" src="Group 2085667457.png" alt="결과 프레임" style="display:block;margin:0 auto;">
+
+          <!-- 사진 -->
+          <div id="resultPhotoSpot"
+               style="position:absolute;left:50%;top:30px;transform:translateX(-50%);
+                      width:321.2px;height:391.6px;border-radius:32px;
+                      overflow:hidden;background:#000;border:2px solid rgba(255,255,255,.5);
+                      display:flex;align-items:center;justify-content:center;">
+          </div>
+
+          <!-- 메모 -->
+          <textarea id="polaroid-note"
+            placeholder="오늘의 당신 코멘트를 작성해주세요"
+            style="position:absolute;left:50%;top:455px;transform:translateX(-50%);
+                   width:309px;height:60px;
+                   border:none;outline:none;resize:none;
+                   background:rgba(255,255,255,0.58);border-radius:12px;
+                   padding:10px 12px;font-size:14px;line-height:1.5;
+                   color:#744b35;font-family:'Apple SD Gothic Neo',sans-serif;
+                   text-align:center;
+                   box-shadow:inset 0 2px 5px rgba(0,0,0,0.08);"></textarea>
+        </div>
+
+        <div style="margin-top:8px;font-size:12px;color:#885848;">
+          사진을 터치하면 전·후면 전환됩니다 💫
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <button id="polaroid-back-home" class="btn-soft">홈으로</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- CINEMA -->
+  <section id="view-cinema" class="screen hidden">
+    <div class="cinema-wrap">
+      <div class="cinema-topbar">
+        <button class="btn-soft" id="cinema-home-btn">🏠 홈으로</button>
+        <div class="cinema-step-badge" id="cinema-step-indicator">1 / 9</div>
+      </div>
+
+      <div class="cinema-warning">
+        전시용 에니어그램 시나리오입니다.<br>재미로, 직감적으로 선택해 주세요!
+      </div>
+
+      <div class="cinema-video">
+        <video id="cinema-video" playsinline muted autoplay controls>
+          <source id="cinema-video-src" src="" type="video/mp4">
+        </video>
+      </div>
+
+      <div class="cinema-question-card">
+        <div class="cinema-scenario" id="cinema-scenario-text"></div>
+        <div class="cinema-question" id="cinema-question-text"></div>
+        <div class="cinema-note">복수 선택 가능. 선택 후 아래 버튼으로 이동</div>
+      </div>
+
+      <div class="cinema-choices" id="cinema-choices"></div>
+
+      <div class="cinema-nav-buttons">
+        <button id="cinema-prev-btn" class="btn-soft">◀ 이전으로</button>
+        <button id="cinema-next-btn" class="btn-pill">다음으로 ▶</button>
+      </div>
+
+      <div class="cinema-progress-txt" id="cinema-progress-txt">1 / 9</div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="view-result" class="screen hidden">
+    <div class="result-wrap">
+      <h2>당신의 에니어그램 레이더</h2>
+      <div id="topTypeDesc"
+           style="margin-bottom:14px;background:rgba(255,255,255,.65);border-radius:14px;padding:10px 14px;text-align:left;color:#333;font-size:14px;">
+      </div>
+      <canvas id="enneaChart" width="340" height="340"></canvas>
+      <div id="scoreList" style="margin-top:16px;text-align:left;display:flex;flex-direction:column;gap:4px;"></div>
+      <button id="result-home-btn" class="btn-soft btn-sm" style="margin-top:16px;">홈으로</button>
+    </div>
+  </section>
+
+  <script>
+    // 화면 요소
+    const viewHome = document.getElementById("view-home");
+    const viewRoom = document.getElementById("view-room");
+    const viewCinema = document.getElementById("view-cinema");
+    const viewPolaroid = document.getElementById("view-polaroid");
+    const viewResult = document.getElementById("view-result");
+
+    function showSection(el){
+      [viewHome,viewRoom,viewCinema,viewPolaroid,viewResult].forEach(s=>{
+        if(s===el) s.classList.remove("hidden");
+        else s.classList.add("hidden");
+      });
+    }
+
+    function goHome(){
+      stopStreams();
+      showSection(viewHome);
+    }
+
+    // ROOM
+    const roomSendBtn = document.getElementById("room-send-btn");
+    const roomHomeBtn = document.getElementById("room-home-btn");
+    const roomCompose = document.getElementById("room-compose");
+    const roomSuccess = document.getElementById("room-success");
+    const roomSuccessHome = document.getElementById("room-success-home");
+
+    roomSendBtn.addEventListener("click", ()=>{
+      const emailVal = document.getElementById("room-email-input").value.trim();
+      const letterVal = document.getElementById("room-letter-input").value.trim();
+      if(!emailVal || !letterVal){
+        alert("이메일과 편지를 모두 작성해주세요.");
+        return;
+      }
+
+      // 여기서 구글시트로 보내고 싶으면 이거 주석 풀어서 script url 넣으면 됨
+      /*
+      fetch("https://script.google.com/macros/s/여기에1IVWQDvzsBU5kP0pvWpDTiu45HX1a4s6H6MR764C_XS0URL/exec", {
+        method:"POST",
+        mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({email:emailVal,letter:letterVal,createdAt:new Date().toISOString()})
+      });
+      */
+
+      roomCompose.classList.add("hidden");
+      roomSuccess.classList.remove("hidden");
+    });
+    roomHomeBtn.addEventListener("click", goHome);
+    roomSuccessHome.addEventListener("click", goHome);
+
+    // CINEMA 데이터
+    const QUESTIONS = [
+      {
+        video:"1.mp4",
+        scenarioTitle:"시나리오 1: 친구가 약속을 어겼을 때",
+        description:`친구와의 점심약속 날 친구가 약속 시간에 늦거나 깜빡했습니다.
+이때 당신은 어떻게 반응하겠습니까?`,
+        choices:[
+          {text:"왜 늦었는지 먼저 묻는다.",score:{1:3,2:1,3:0,4:0,5:0,6:1,7:0,8:2,9:0}},
+          {text:"괜찮아~ 늦을 수도 있지라고 이해하고 넘어간다.",score:{1:0,2:0,3:0,4:0,5:1,6:1,7:2,8:1,9:3}},
+          {text:"속은 좀 불편하지만 겉으론 괜찮다고 한다.",score:{1:0,2:0,3:1,4:0,5:0,6:3,7:0,8:1,9:1}},
+          {text:"다음부턴 미리 말해달라고 부드럽게 말한다.",score:{1:1,2:0,3:1,4:0,5:0,6:0,7:2,8:3,9:0}},
+          {text:"약속 지연을 신경 쓰지 않고 오히려 즐겁게 상황을 넘긴다",score:{1:0,2:0,3:0,4:0,5:3,6:0,7:3,8:0,9:1}}
+        ]
+      },
+      {
+        video:"2.mp4",
+        scenarioTitle:"시나리오 2: 새로운 프로젝트",
+        description:`처음 맡는 중요한 프로젝트를 책임지게 되었습니다.
+이때 당신은 어떻게 반응하겠습니까?`,
+        choices:[
+          {text:"철저히 모든 것을 미리 계획하고 준비한다.",score:{1:3,2:0,3:1,4:0,5:0,6:1,7:0,8:2,9:0}},
+          {text:"동료에게 조언이나 도움을 구한다.",score:{1:0,2:3,3:0,4:0,5:0,6:2,7:0,8:0,9:1}},
+          {text:"걱정과 긴장을 느끼며 부담과 스트레스를 받는다.",score:{1:0,2:0,3:3,4:1,5:0,6:2,7:0,8:0,9:0}},
+          {text:"내 실력 보여줄 기회라고 생각하고 적극적으로 나선다.",score:{1:2,2:0,3:0,4:3,5:0,6:0,7:1,8:2,9:0}},
+          {text:"창의적인 새로운 방법을 시험해 본다.",score:{1:0,2:0,3:0,4:1,5:1,6:0,7:3,8:0,9:2}}
+        ]
+      },
+      {
+        video:"3.mp4",
+        scenarioTitle:"시나리오 3: 친구가 힘들어할 때",
+        description:`친한 친구가 갑자기 힘든 일이 생겨 많이 다운돼 있습니다.
+이때 당신은 어떻게 반응하겠습니까?`,
+        choices:[
+          {text:"적극적으로 문제 해결 방법을 찾아주려고 한다.",score:{1:0,2:3,3:1,4:0,5:0,6:0,7:0,8:2,9:0}},
+          {text:"함께 옆에서 있어주며 친구의 마음을 달래준다.",score:{1:0,2:2,3:0,4:0,5:1,6:0,7:0,8:1,9:3}},
+          {text:"상황을 분석해서 최선의 방법을 조언한다.",score:{1:3,2:0,3:0,4:0,5:0,6:2,7:0,8:0,9:1}},
+          {text:"스스로 이겨낼 수 있게 응원한다.",score:{1:1,2:0,3:0,4:0,5:0,6:0,7:3,8:2,9:0}},
+          {text:"기분전환을 시켜준다.",score:{1:0,2:0,3:0,4:1,5:0,6:0,7:3,8:0,9:2}}
+        ]
+      },
+      {
+        video:"4.mp4",
+        scenarioTitle:"시나리오 4: 중요한 결정",
+        description:`최근 눈여겨보던 주식이 큰 변동을 보이고 있습니다. 지금 사면 이득일 수도, 손해일 수도 있는 선택이 눈앞에 있습니다.
+이때 당신은 어떻게 하겠습니까?`,
+        choices:[
+          {text:"모든 요소를 철저히 분석하고 고려해 신중하게 계획하고 결정한다",score:{1:3,2:0,3:0,4:0,5:0,6:1,7:0,8:2,9:1}},
+          {text:"느낌, 직관에 따라 빠르게 결정한다.",score:{1:0,2:0,3:0,4:3,5:0,6:1,7:0,8:2,9:0}},
+          {text:"주변의 의견을 듣고 참고하여 신중하게 결정한다.",score:{1:0,2:0,3:0,4:1,5:0,6:3,7:0,8:1,9:1}},
+          {text:"망설이지 않고 실행한다.",score:{1:2,2:0,3:3,4:0,5:0,6:0,7:1,8:2,9:0}},
+          {text:"조금 미뤄두고 더 많은 가능성을 탐색해본다.",score:{1:0,2:0,3:0,4:1,5:1,6:0,7:2,8:3,9:0}}
+        ]
+      },
+      {
+        video:"5.mp4",
+        scenarioTitle:"시나리오 5: 첫 모임",
+        description:`처음 간 모임에서 회식을 하게 되었습니다.
+이때 당신은?`,
+        choices:[
+          {text:"조용히 분위기를 관찰하며 천천히 적응한다.",score:{1:0,2:0,3:0,4:1,5:0,6:2,7:0,8:0,9:3}},
+          {text:"적극적으로 내가 먼저 말 걸어본다.",score:{1:0,2:3,3:1,4:0,5:0,6:0,7:1,8:0,9:2}},
+          {text:"주변에 앉은 사람들과 가벼운 대화를 하며 여러 사람들과 점차 친해진다",score:{1:0,2:0,3:0,4:0,5:1,6:0,7:3,8:1,9:2}},
+          {text:"당신의 존재감을 드러내며 다른 사람들에게 당신의 존재를 각인시킨다.",score:{1:1,2:0,3:0,4:3,5:0,6:0,7:0,8:2,9:0}},
+          {text:"자리를 신중하게 선택하고 술자리 예절에 신경쓴다.",score:{1:3,2:0,3:0,4:0,5:0,6:1,7:0,8:2,9:0}}
+        ]
+      },
+      {
+        video:"6.mp4",
+        scenarioTitle:"시나리오 6: 룸메와 갈등",
+        description:`룸메이트와 생활 습관이 달라 갈등이 생겼습니다.
+어떻게 할까요?`,
+        choices:[
+          {text:"내 의견을 강하게 말한다.",score:{1:0,2:0,3:0,4:1,5:0,6:0,7:1,8:3,9:0}},
+          {text:"룸메이트의 입장을 이해하고 타협점을 찾는다.",score:{1:0,2:1,3:0,4:0,5:1,6:0,7:0,8:0,9:3}},
+          {text:"논리적으로 설득한다.",score:{1:3,2:0,3:0,4:0,5:0,6:2,7:0,8:0,9:1}},
+          {text:"속으로만 끙끙댄다.",score:{1:0,2:0,3:0,4:3,5:0,6:1,7:0,8:0,9:1}},
+          {text:"갈등을 피하며 분위기를 부드럽게 만든다.",score:{1:0,2:0,3:0,4:1,5:2,6:0,7:3,8:0,9:0}}
+        ]
+      },
+      {
+        video:"7.mp4",
+        scenarioTitle:"시나리오 7: 실패했을 때",
+        description:`열심히 준비한 일을 실패했습니다.
+이때 당신은?`,
+        choices:[
+          {text:"실패 요인을 분석하고 다음 실험을 탄탄하게 준비한다.",score:{1:3,2:0,3:0,4:0,5:0,6:1,7:0,8:2,9:0}},
+          {text:"매우 속상해하며 스스로를 자책한다.",score:{1:0,2:0,3:0,4:3,5:0,6:1,7:0,8:0,9:2}},
+          {text:"주변 사람의 도움으로 실패의 아픔을 회복한다.",score:{1:0,2:3,3:0,4:0,5:0,6:0,7:1,8:0,9:2}},
+          {text:"새로운 가설로 다시 도전한다!",score:{1:2,2:0,3:3,4:0,5:0,6:0,7:1,8:2,9:0}},
+          {text:"실패도 경험이라 생각한다.",score:{1:0,2:0,3:0,4:1,5:2,6:0,7:3,8:0,9:1}}
+        ]
+      },
+      {
+        video:"8.mp4",
+        scenarioTitle:"시나리오 8: 여행 중 위기",
+        description:`친구들과의 해외여행 중 예약이 누락되어 버렸습니다!
+이때 당신은 어떻게 반응하겠습니까?`,
+        choices:[
+          {text:"침착하게 유지하며 계획적으로 문제에 대응한다",score:{1:3,2:0,3:0,4:0,5:0,6:1,7:0,8:2,9:1}},
+          {text:"주변 사람을 챙기며 상황을 안정시킨다.",score:{1:0,2:3,3:1,4:0,5:0,6:1,7:0,8:1,9:2}},
+          {text:"내가 앞장서서 해결한다.",score:{1:1,2:0,3:0,4:0,5:0,6:0,7:3,8:2,9:0}},
+          {text:"이번일을 통해 다음에는 이런 일이 발생하지 않으려 한다.",score:{1:0,2:0,3:0,4:3,5:0,6:1,7:0,8:0,9:2}},
+          {text:"이것도 여행의 재미라 생각한다.",score:{1:0,2:0,3:0,4:1,5:3,6:0,7:2,8:0,9:0}}
+        ]
+      },
+      {
+        video:"9.mp4",
+        scenarioTitle:"시나리오 9: 주말",
+        description:`바쁜 한 주가 끝났습니다. 주말에 하고 싶은 건?`,
+        choices:[
+          {text:"조용히 혼자 보내기",score:{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:1,9:3}},
+          {text:"가족/친구와 시간 보내기",score:{1:0,2:3,3:1,4:0,5:0,6:0,7:0,8:0,9:2}},
+          {text:"그림 그리거나 만들기",score:{1:0,2:0,3:0,4:3,5:0,6:1,7:0,8:0,9:2}},
+          {text:"가볍게 여행 나가기",score:{1:0,2:0,3:0,4:1,5:0,6:0,7:3,8:0,9:2}},
+          {text:"계획된 휴식과 자기계발",score:{1:3,2:0,3:0,4:0,5:0,6:1,7:0,8:2,9:0}}
+        ]
+      }
+    ];
+
+    const scores = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
+    let currentQ = 0;
+    let currentSelections = [];
+
+    const cinemaHomeBtn = document.getElementById("cinema-home-btn");
+    const elVideo = document.getElementById("cinema-video");
+    const elVideoSrc = document.getElementById("cinema-video-src");
+    const elScenario = document.getElementById("cinema-scenario-text");
+    const elQuestionTxt = document.getElementById("cinema-question-text");
+    const elChoicesWrap = document.getElementById("cinema-choices");
+    const elStepIndicator = document.getElementById("cinema-step-indicator");
+    const elProgressTxt = document.getElementById("cinema-progress-txt");
+    const cinemaNextBtn = document.getElementById("cinema-next-btn");
+    const cinemaPrevBtn = document.getElementById("cinema-prev-btn");
+
+    cinemaHomeBtn.addEventListener("click", goHome);
+
+    function resetScores(){
+      for(let t=1;t<=9;t++) scores[t] = 0;
+    }
+    function updateStepText(i){
+      const txt = (i+1)+" / "+QUESTIONS.length;
+      elStepIndicator.textContent = txt;
+      elProgressTxt.textContent = txt;
+    }
+    function loadQuestion(idx){
+      const q = QUESTIONS[idx];
+      currentQ = idx;
+      currentSelections = [];
+
+      elVideo.pause();
+      elVideoSrc.src = q.video;
+      elVideo.load();
+      elVideo.play().catch(()=>{});
+
+      elScenario.textContent = q.scenarioTitle;
+      elQuestionTxt.textContent = q.description;
+      updateStepText(idx);
+
+      elChoicesWrap.innerHTML = "";
+      q.choices.forEach((ch,i)=>{
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.textContent = ch.text;
+        btn.addEventListener("click", ()=>{
+          const has = currentSelections.indexOf(i);
+          if(has>-1){
+            currentSelections.splice(has,1);
+            btn.classList.remove("selected");
+          }else{
+            currentSelections.push(i);
+            btn.classList.add("selected");
+          }
+        });
+        elChoicesWrap.appendChild(btn);
+      });
+    }
+    function applySelectedScores(){
+      const q = QUESTIONS[currentQ];
+      currentSelections.forEach(sel=>{
+        const sObj = q.choices[sel].score;
+        for(let t=1;t<=9;t++){
+          scores[t] += (sObj[t] || 0);
+        }
+      });
+    }
+    cinemaNextBtn.addEventListener("click", ()=>{
+      if(currentSelections.length===0){
+        alert("하나 이상 골라주세요 :)");
+        return;
+      }
+      applySelectedScores();
+      if(currentQ < QUESTIONS.length-1){
+        loadQuestion(currentQ+1);
+      }else{
+        showResult();
+      }
+    });
+    cinemaPrevBtn.addEventListener("click", ()=>{
+      if(currentQ>0){
+        loadQuestion(currentQ-1);
+      }else{
+        alert("첫 번째 문항입니다!");
+      }
+    });
+    function startCinema(){
+      resetScores();
+      loadQuestion(0);
+    }
+
+    // RESULT
+    const TYPE_COLORS = {
+      1: "#000000",
+      2: "#1E64FF",
+      3: "#FF8A00",
+      4: "#8A46FF",
+      5: "#2EBF6E",
+      6: "#8A4B2E",
+      7: "#F6D33A",
+      8: "#FF3B2F",
+      9: "#9CA3AF"
+    };
+    const TYPE_DESC = {
+      1: "1유형 - 옳은 일을 위해 노력하는 원칙적인 타입이에요. 기준이 분명해서 팀에서 기준점 역할을 잘 해요.",
+      2: "2유형 - 사람을 잘 돌보고 챙기는 타입이에요. 관계에서 따뜻함과 안정감을 줍니다.",
+      3: "3유형 - 목표지향적이고 성취를 중시하는 타입이에요. 결과를 만들고 싶어해요.",
+      4: "4유형 - 감성적이고 자기만의 개성을 중시하는 타입이에요. 표현이 중요한 사람!",
+      5: "5유형 - 분석, 관찰, 정리가 편한 타입이에요. 한 발 물러서서 보는 걸 잘해요.",
+      6: "6유형 - 신뢰와 안전을 중시하는 타입이에요. 팀에 있으면 든든해요.",
+      7: "7유형 - 밝고 아이디어가 많고 새로운 걸 좋아하는 타입이에요. 분위기 메이커!",
+      8: "8유형 - 추진력 있고 보호본능 있는 리더형 타입이에요. 불공정을 못 참아요.",
+      9: "9유형 - 평화롭고 조율 잘 하는 타입이에요. 갈등을 부드럽게 만드는 힘이 있어요."
+    };
+
+    function drawRadarChart(scoresObj){
+      const canvas = document.getElementById("enneaChart");
+      const ctx = canvas.getContext("2d");
+      const scoreListEl = document.getElementById("scoreList");
+      const topTypeDescEl = document.getElementById("topTypeDesc");
+
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      const cx = canvas.width/2;
+      const cy = canvas.height/2;
+      const maxR = Math.min(cx,cy) - 20;
+
+      const entries = Object.keys(scoresObj).map(num=>({
+        type:Number(num),
+        score:scoresObj[num]
+      })).sort((a,b)=>b.score-a.score);
+
+      const maxVal = Math.max(entries[0].score, 1);
+      const topType = entries[0].type;
+      const topColor = TYPE_COLORS[topType] || "#EE5C79";
+
+      const count = 9;
+      const angleStep = (Math.PI*2)/count;
+
+      // 배경 원
+      ctx.strokeStyle = "rgba(255,110,90,0.25)";
+      ctx.lineWidth = 1;
+      for(let level=1; level<=4; level++){
+        const r = (maxR/4)*level;
+        ctx.beginPath();
+        for(let i=0;i<count;i++){
+          const ang = -Math.PI/2 + angleStep*i;
+          const x = cx + Math.cos(ang)*r;
+          const y = cy + Math.sin(ang)*r;
+          if(i===0) ctx.moveTo(x,y);
+          else ctx.lineTo(x,y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // 축선
+      for(let i=0;i<count;i++){
+        const ang = -Math.PI/2 + angleStep*i;
+        const x = cx + Math.cos(ang)*maxR;
+        const y = cy + Math.sin(ang)*maxR;
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.lineTo(x,y);
+        ctx.stroke();
+      }
+
+      // 데이터
+      ctx.beginPath();
+      for(let i=1;i<=count;i++){
+        const val = scoresObj[i] || 0;
+        const ratio = val / maxVal;
+        const r = maxR * ratio;
+        const ang = -Math.PI/2 + angleStep*(i-1);
+        const x = cx + Math.cos(ang)*r;
+        const y = cy + Math.sin(ang)*r;
+        if(i===1) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = hexToRgba(topColor, 0.35);
+      ctx.fill();
+      ctx.strokeStyle = topColor;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 꼭짓점 + 번호
+      for(let i=1;i<=count;i++){
+        const val = scoresObj[i] || 0;
+        const ratio = val / maxVal;
+        const r = maxR * ratio;
+        const ang = -Math.PI/2 + angleStep*(i-1);
+        const x = cx + Math.cos(ang)*r;
+        const y = cy + Math.sin(ang)*r;
+
+        ctx.beginPath();
+        ctx.arc(x,y,4,0,Math.PI*2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.strokeStyle = topColor;
+        ctx.stroke();
+
+        const labelX = cx + Math.cos(ang)*(maxR+14);
+        const labelY = cy + Math.sin(ang)*(maxR+14);
+        ctx.fillStyle = TYPE_COLORS[i];
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(i.toString(), labelX, labelY);
+      }
+
+      if(topTypeDescEl){
+        topTypeDescEl.textContent = TYPE_DESC[topType] || `Type ${topType} 성향이 가장 높아요.`;
+      }
+
+      if(scoreListEl){
+        scoreListEl.innerHTML = "";
+        entries.forEach((item,idx)=>{
+          const line = document.createElement("div");
+          line.style.display = "flex";
+          line.style.alignItems = "center";
+          line.style.gap = "8px";
+
+          const dot = document.createElement("span");
+          dot.style.width = "12px";
+          dot.style.height = "12px";
+          dot.style.borderRadius = "50%";
+          dot.style.background = TYPE_COLORS[item.type];
+          line.appendChild(dot);
+
+          const txt = document.createElement("span");
+          txt.textContent = `유형 ${item.type} — ${item.score}점`;
+          if(idx===0) txt.style.fontWeight = "700";
+          line.appendChild(txt);
+
+          scoreListEl.appendChild(line);
+        });
+      }
+    }
+
+    function hexToRgba(hex, alpha){
+      const v = hex.replace("#","");
+      const r = parseInt(v.slice(0,2),16);
+      const g = parseInt(v.slice(2,4),16);
+      const b = parseInt(v.slice(4,6),16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    function showResult(){
+      showSection(viewResult);
+      drawRadarChart(scores);
+    }
+
+    // POLAROID
+    const liveStage = document.getElementById("polaroid-live-stage");
+    const resultStage = document.getElementById("polaroid-result-stage");
+    const backCamFullVideo = document.getElementById("backCamFull");
+    const frontCamSmallVid = document.getElementById("frontCamSmall");
+    const countdownText = document.getElementById("countdownText");
+    const resultPhotoSpot = document.getElementById("resultPhotoSpot");
+    const polaroidHomeBtn = document.getElementById("polaroid-back-home");
+    const polaroidStartBtn = document.getElementById("polaroid-start-btn");
+    const polaroidLiveHome = document.getElementById("polaroid-live-home");
+
+    let frontStream = null;
+    let backStream = null;
+    let captureFrontDataURL = null;
+    let captureBackDataURL = null;
+    let showingWhich = "front";
+
+    polaroidHomeBtn.addEventListener("click", goHome);
+    polaroidLiveHome.addEventListener("click", goHome);
+
+    polaroidStartBtn.addEventListener("click", ()=>{
+      polaroidStartBtn.disabled = true;
+      polaroidStartBtn.textContent = "카메라 준비 중...";
+      startCameraAndCountdown();
+    });
+
+    async function startCameraAndCountdown(){
+      try{
+        frontStream = await navigator.mediaDevices.getUserMedia({
+          video:{facingMode:"user"},
+          audio:false
+        });
+        frontCamSmallVid.srcObject = frontStream;
+
+        try{
+          backStream = await navigator.mediaDevices.getUserMedia({
+            video:{facingMode:{ideal:"environment"}},
+            audio:false
+          });
+          backCamFullVideo.srcObject = backStream;
+        }catch(e){
+          console.warn("back cam fail", e);
+          if(!backStream && frontStream){
+            backCamFullVideo.srcObject = frontStream;
+          }
+        }
+
+        countdownText.style.display = "block";
+        startCountdownAndCapture(5);
+
+      }catch(err){
+        alert("카메라 권한을 허용해야 촬영할 수 있어요 🥲");
+        console.error(err);
+        polaroidStartBtn.disabled = false;
+        polaroidStartBtn.textContent = "카메라 다시 시도";
+      }
+    }
+
+    function stopStreams(){
+      if(frontStream){
+        frontStream.getTracks().forEach(t=>t.stop());
+        frontStream = null;
+      }
+      if(backStream){
+        backStream.getTracks().forEach(t=>t.stop());
+        backStream = null;
+      }
+    }
+
+    function grabFrame(videoEl){
+      if(!videoEl || !videoEl.srcObject) return null;
+      const track = videoEl.srcObject.getVideoTracks()[0];
+      const s = track.getSettings();
+      const w = s.width || videoEl.videoWidth || 640;
+      const h = s.height || videoEl.videoHeight || 480;
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(videoEl,0,0,w,h);
+      return c.toDataURL("image/png");
+    }
+
+    function renderResultPhoto(which){
+      showingWhich = which;
+      const url = (which==="front") ? captureFrontDataURL : captureBackDataURL;
+      resultPhotoSpot.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = url || "";
+      resultPhotoSpot.appendChild(img);
+    }
+
+    resultPhotoSpot.addEventListener("click", ()=>{
+      renderResultPhoto(showingWhich==="front" ? "back" : "front");
+    });
+
+    function doCaptureAndShowResult(){
+      captureFrontDataURL = grabFrame(frontCamSmallVid);
+      captureBackDataURL = grabFrame(backCamFullVideo);
+      liveStage.classList.add("hidden");
+      resultStage.classList.remove("hidden");
+      renderResultPhoto("front");
+      stopStreams();
+    }
+
+    function startCountdownAndCapture(sec){
+      let remain = sec;
+      countdownText.textContent = remain;
+      const timer = setInterval(()=>{
+        remain--;
+        countdownText.textContent = remain;
+        if(remain<=0){
+          clearInterval(timer);
+          doCaptureAndShowResult();
+        }
+      },1000);
+    }
+
+    // 버튼 연결
+    document.getElementById("go-cinema").addEventListener("click", ()=>{
+      showSection(viewCinema);
+      startCinema();
+    });
+    document.getElementById("go-room").addEventListener("click", ()=>{
+      showSection(viewRoom);
+    });
+    document.getElementById("go-polaroid").addEventListener("click", ()=>{
+      showSection(viewPolaroid);
+      // 이제는 여기서 바로 카메라 안 켜고, 버튼 눌러서 켜게 해둠
+    });
+    document.getElementById("result-home-btn").addEventListener("click", goHome);
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("polaroid-start-btn");
+  if (btn) {
+    btn.addEventListener("click", ()=>{
+      polaroidStartBtn.disabled = true;
+      polaroidStartBtn.textContent = "카메라 준비 중...";
+      startCameraAndCountdown();
+    });
+  }
+});
+
+  </script>
+</body>
+</html>
