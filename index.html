@@ -6,9 +6,12 @@
   <title>이십춘기 시나리오 테스트</title>
 
   <style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
     /* ========== 공통 ========== */
     *{box-sizing:border-box;}
-    body{margin:0;font-family:system-ui,-apple-system,"Apple SD Gothic Neo",Roboto,sans-serif;background:#fff;}
+    body{margin:0;font-family:'Nanum Gothic',-apple-system,"Apple SD Gothic Neo",Roboto,sans-serif;background:#fff;}
     .screen{width:100%;min-height:100vh;}
     .hidden{display:none !important;}
 
@@ -169,19 +172,78 @@
     .choice-btn.selected::before{background:#ff955b;}
     .cinema-nav-buttons{display:flex;justify-content:center;gap:12px;margin-top:8px;}
     .cinema-progress-txt{text-align:center;font-size:12px;color:#ff7b3f;}
+/* ========== RESULT (레이더) ========== */
+#view-result{
+  position:relative;
+  width:100%;
+  min-height:100vh;
+  background:radial-gradient(circle,#ffd7c7 0%,#ffb6ac 45%,#ffb2b7 100%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:30px 16px;
+}
 
-    /* ========== RESULT (레이더) ========== */
-    #view-result{
-      position:relative;width:100%;min-height:100vh;
-      background:radial-gradient(circle,#fff2e3 0%,#ffd3cb 45%,#ffb7bc 100%);
-      display:flex;justify-content:center;align-items:center;padding:30px 16px;
-    }
-    .result-wrap{
-      background:rgba(255,255,255,.7);border:3px solid rgba(255,116,127,.2);
-      border-radius:32px;box-shadow:0 20px 50px rgba(255,138,146,.25);
-      padding:20px 20px 16px;text-align:center;max-width:780px;width:100%;
-    }
-    #enneaChart{background:rgba(255,255,255,.4);border-radius:20px;border:1px solid rgba(255,157,163,.3);}
+.result-wrap{
+  background:#fff7ef;
+  border:1.5px solid rgba(255,148,130,.35);
+  border-radius:36px;
+  box-shadow:0 20px 45px rgba(255,137,120,.25);
+  max-width:820px;
+  width:100%;
+  padding:24px 26px 26px;
+}
+
+.result-wrap h2{
+  text-align:center;
+  margin:0 0 14px;
+  font-size:22px;
+  color:#222;
+}
+
+#topTypeDesc{
+  background:#fff;
+  border-radius:14px;
+  padding:10px 14px;
+  font-size:14px;
+  color:#444;
+  margin-bottom:14px;
+  border:1px dashed rgba(255,148,130,.35);
+}
+
+.result-body{
+  display:flex;
+  gap:22px;
+  align-items:flex-start;
+}
+
+.result-chart-box{
+  background:#ffe9dc;
+  border:1px solid rgba(255,172,144,.35);
+  border-radius:26px;
+  padding:10px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#enneaChart{
+  display:block;
+}
+
+/* 점수 리스트 */
+#scoreList{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  font-size:13px;
+  color:#222;
+  margin-top:4px;
+}
+
+@media (max-width:768px){
+  .result-body{flex-direction:column;align-items:center;}
+}
 
     /* ========== POLAROID ========== */
     #view-polaroid{
@@ -376,18 +438,23 @@
     </div>
   </section>
 
-  <!-- RESULT -->
-  <section id="view-result" class="screen hidden">
-    <div class="result-wrap">
-      <h2>당신의 에니어그램 레이더</h2>
-      <div id="topTypeDesc"
-           style="margin-bottom:14px;background:rgba(255,255,255,.65);border-radius:14px;padding:10px 14px;text-align:left;color:#333;font-size:14px;">
+<section id="view-result" class="screen hidden">
+  <div class="result-wrap">
+    <h2>당신의 에니어그램 레이더</h2>
+    <div id="topTypeDesc"></div>
+
+    <div class="result-body">
+      <div class="result-chart-box">
+        <!-- 논리 크기만 맞춰놓고 실제 픽셀은 JS에서 올릴 거야 -->
+        <canvas id="enneaChart" width="360" height="360"></canvas>
       </div>
-      <canvas id="enneaChart" width="340" height="340"></canvas>
-      <div id="scoreList" style="margin-top:16px;text-align:left;display:flex;flex-direction:column;gap:4px;"></div>
-      <button id="result-home-btn" class="btn-soft btn-sm" style="margin-top:16px;">홈으로</button>
+      <div id="scoreList"></div>
     </div>
-  </section>
+
+    <button id="result-home-btn" class="btn-soft btn-sm" style="margin-top:16px;">홈으로</button>
+  </div>
+</section>
+
 
   <script>
     // 화면 요소
@@ -650,306 +717,285 @@
       loadQuestion(0);
     }
 
-    // RESULT
-    const TYPE_COLORS = {
-      1: "#000000",
-      2: "#1E64FF",
-      3: "#FF8A00",
-      4: "#8A46FF",
-      5: "#2EBF6E",
-      6: "#8A4B2E",
-      7: "#F6D33A",
-      8: "#FF3B2F",
-      9: "#9CA3AF"
-    };
-    const TYPE_DESC = {
-      1: "1유형 - 옳은 일을 위해 노력하는 원칙적인 타입이에요. 기준이 분명해서 팀에서 기준점 역할을 잘 해요.",
-      2: "2유형 - 사람을 잘 돌보고 챙기는 타입이에요. 관계에서 따뜻함과 안정감을 줍니다.",
-      3: "3유형 - 목표지향적이고 성취를 중시하는 타입이에요. 결과를 만들고 싶어해요.",
-      4: "4유형 - 감성적이고 자기만의 개성을 중시하는 타입이에요. 표현이 중요한 사람!",
-      5: "5유형 - 분석, 관찰, 정리가 편한 타입이에요. 한 발 물러서서 보는 걸 잘해요.",
-      6: "6유형 - 신뢰와 안전을 중시하는 타입이에요. 팀에 있으면 든든해요.",
-      7: "7유형 - 밝고 아이디어가 많고 새로운 걸 좋아하는 타입이에요. 분위기 메이커!",
-      8: "8유형 - 추진력 있고 보호본능 있는 리더형 타입이에요. 불공정을 못 참아요.",
-      9: "9유형 - 평화롭고 조율 잘 하는 타입이에요. 갈등을 부드럽게 만드는 힘이 있어요."
-    };
+    // 색상 – 오른쪽 디자인 느낌으로 조금 더 파스텔+선명
+const TYPE_COLORS = {
+  1: "#2d2d38",
+  2: "#29b1b0",
+  3: "#ff8a00",
+  4: "#7a6bff",
+  5: "#2ebf6e",
+  6: "#a86a46",
+  7: "#ffbe3b",
+  8: "#ff3b2f",
+  9: "#b5bcc7"
+};
 
-    function drawRadarChart(scoresObj){
-      const canvas = document.getElementById("enneaChart");
-      const ctx = canvas.getContext("2d");
-      const scoreListEl = document.getElementById("scoreList");
-      const topTypeDescEl = document.getElementById("topTypeDesc");
+const TYPE_DESC = {
+  1: "1유형 - 옳은 일을 위해 노력하는 원칙적인 타입이에요. 기준이 분명해서 팀에서 기준점 역할을 잘 해요.",
+  2: "2유형 - 사람을 잘 돌보고 챙기는 타입이에요. 관계에서 따뜻함과 안정감을 줍니다.",
+  3: "3유형 - 목표지향적이고 성취를 중시하는 타입이에요. 결과를 만들고 싶어해요.",
+  4: "4유형 - 감성적이고 자기만의 개성을 중시하는 타입이에요. 표현이 중요한 사람!",
+  5: "5유형 - 분석, 관찰, 정리가 편한 타입이에요. 한 발 물러서서 보는 걸 잘해요.",
+  6: "6유형 - 신뢰와 안전을 중시하는 타입이에요. 팀에 있으면 든든해요.",
+  7: "7유형 - 밝고 아이디어가 많고 새로운 걸 좋아하는 타입이에요. 분위기 메이커!",
+  8: "8유형 - 추진력 있고 보호본능 있는 리더형 타입이에요. 불공정을 못 참아요.",
+  9: "9유형 - 평화롭고 조율 잘 하는 타입이에요. 갈등을 부드럽게 만드는 힘이 있어요."
+};
 
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+function drawRadarChart(scoresObj){
+  const canvas = document.getElementById("enneaChart");
+  const ctx = canvas.getContext("2d");
 
-      const cx = canvas.width/2;
-      const cy = canvas.height/2;
-      const maxR = Math.min(cx,cy) - 20;
+  // ★ 고해상도 처리
+  const dpr = window.devicePixelRatio || 1;
+  const logicalSize = 360;              // 우리가 보고 싶은 크기
+  canvas.style.width  = logicalSize + "px";
+  canvas.style.height = logicalSize + "px";
+  canvas.width  = logicalSize * dpr;
+  canvas.height = logicalSize * dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);    // 이후 그리는 건 논리 크기로
 
-      const entries = Object.keys(scoresObj).map(num=>({
-        type:Number(num),
-        score:scoresObj[num]
-      })).sort((a,b)=>b.score-a.score);
+  const scoreListEl = document.getElementById("scoreList");
+  const topTypeDescEl = document.getElementById("topTypeDesc");
 
-      const maxVal = Math.max(entries[0].score, 1);
-      const topType = entries[0].type;
-      const topColor = TYPE_COLORS[topType] || "#EE5C79";
+  ctx.clearRect(0,0,logicalSize,logicalSize);
 
-      const count = 9;
-      const angleStep = (Math.PI*2)/count;
+  const cx = logicalSize/2;
+  const cy = logicalSize/2;
+  const maxR = Math.min(cx,cy) - 32;
 
-      // 배경 원
-      ctx.strokeStyle = "rgba(255,110,90,0.25)";
-      ctx.lineWidth = 1;
-      for(let level=1; level<=4; level++){
-        const r = (maxR/4)*level;
-        ctx.beginPath();
-        for(let i=0;i<count;i++){
-          const ang = -Math.PI/2 + angleStep*i;
-          const x = cx + Math.cos(ang)*r;
-          const y = cy + Math.sin(ang)*r;
-          if(i===0) ctx.moveTo(x,y);
-          else ctx.lineTo(x,y);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
+  const entries = Object.keys(scoresObj).map(num=>({
+    type:Number(num),
+    score:scoresObj[num]
+  })).sort((a,b)=>b.score-a.score);
 
-      // 축선
-      for(let i=0;i<count;i++){
-        const ang = -Math.PI/2 + angleStep*i;
-        const x = cx + Math.cos(ang)*maxR;
-        const y = cy + Math.sin(ang)*maxR;
-        ctx.beginPath();
-        ctx.moveTo(cx,cy);
-        ctx.lineTo(x,y);
-        ctx.stroke();
-      }
+  const maxVal = Math.max(entries[0].score, 1);
+  const topType = entries[0].type;
+  const topColor = TYPE_COLORS[topType] || "#ff3b2f";
 
-      // 데이터
-      ctx.beginPath();
-      for(let i=1;i<=count;i++){
-        const val = scoresObj[i] || 0;
-        const ratio = val / maxVal;
-        const r = maxR * ratio;
-        const ang = -Math.PI/2 + angleStep*(i-1);
-        const x = cx + Math.cos(ang)*r;
-        const y = cy + Math.sin(ang)*r;
-        if(i===1) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      }
-      ctx.closePath();
-      ctx.fillStyle = hexToRgba(topColor, 0.35);
-      ctx.fill();
-      ctx.strokeStyle = topColor;
-      ctx.lineWidth = 2;
-      ctx.stroke();
+  const count = 9;
+  const angleStep = (Math.PI*2)/count;
 
-      // 꼭짓점 + 번호
-      for(let i=1;i<=count;i++){
-        const val = scoresObj[i] || 0;
-        const ratio = val / maxVal;
-        const r = maxR * ratio;
-        const ang = -Math.PI/2 + angleStep*(i-1);
-        const x = cx + Math.cos(ang)*r;
-        const y = cy + Math.sin(ang)*r;
-
-        ctx.beginPath();
-        ctx.arc(x,y,4,0,Math.PI*2);
-        ctx.fillStyle = "#fff";
-        ctx.fill();
-        ctx.strokeStyle = topColor;
-        ctx.stroke();
-
-        const labelX = cx + Math.cos(ang)*(maxR+14);
-        const labelY = cy + Math.sin(ang)*(maxR+14);
-        ctx.fillStyle = TYPE_COLORS[i];
-        ctx.font = "11px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(i.toString(), labelX, labelY);
-      }
-
-      if(topTypeDescEl){
-        topTypeDescEl.textContent = TYPE_DESC[topType] || `Type ${topType} 성향이 가장 높아요.`;
-      }
-
-      if(scoreListEl){
-        scoreListEl.innerHTML = "";
-        entries.forEach((item,idx)=>{
-          const line = document.createElement("div");
-          line.style.display = "flex";
-          line.style.alignItems = "center";
-          line.style.gap = "8px";
-
-          const dot = document.createElement("span");
-          dot.style.width = "12px";
-          dot.style.height = "12px";
-          dot.style.borderRadius = "50%";
-          dot.style.background = TYPE_COLORS[item.type];
-          line.appendChild(dot);
-
-          const txt = document.createElement("span");
-          txt.textContent = `유형 ${item.type} — ${item.score}점`;
-          if(idx===0) txt.style.fontWeight = "700";
-          line.appendChild(txt);
-
-          scoreListEl.appendChild(line);
-        });
-      }
+  // 배경 그리드
+  ctx.lineWidth = 1;
+  for(let level=1; level<=5; level++){
+    const r = (maxR/5)*level;
+    ctx.beginPath();
+    for(let i=0;i<count;i++){
+      const ang = -Math.PI/2 + angleStep*i;
+      const x = cx + Math.cos(ang)*r;
+      const y = cy + Math.sin(ang)*r;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
     }
+    ctx.closePath();
+    ctx.strokeStyle = "rgba(255,148,130,0.35)";
+    ctx.stroke();
+  }
 
-    function hexToRgba(hex, alpha){
-      const v = hex.replace("#","");
-      const r = parseInt(v.slice(0,2),16);
-      const g = parseInt(v.slice(2,4),16);
-      const b = parseInt(v.slice(4,6),16);
-      return `rgba(${r},${g},${b},${alpha})`;
-    }
+  // 축선
+  for(let i=0;i<count;i++){
+    const ang = -Math.PI/2 + angleStep*i;
+    const x = cx + Math.cos(ang)*maxR;
+    const y = cy + Math.sin(ang)*maxR;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(x,y);
+    ctx.strokeStyle = "rgba(255,148,130,0.25)";
+    ctx.stroke();
+  }
 
-    function showResult(){
-      showSection(viewResult);
-      drawRadarChart(scores);
-    }
+  // 데이터 폴리곤
+  ctx.beginPath();
+  for(let i=1;i<=count;i++){
+    const val = scoresObj[i] || 0;
+    const ratio = val / maxVal;
+    const r = maxR * ratio;
+    const ang = -Math.PI/2 + angleStep*(i-1);
+    const x = cx + Math.cos(ang)*r;
+    const y = cy + Math.sin(ang)*r;
+    if(i===1) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle   = hexToRgba(topColor, 0.35);
+  ctx.strokeStyle = topColor;
+  ctx.lineWidth   = 2.4;
+  ctx.fill();
+  ctx.stroke();
 
-    // POLAROID
-    const liveStage = document.getElementById("polaroid-live-stage");
-    const resultStage = document.getElementById("polaroid-result-stage");
-    const backCamFullVideo = document.getElementById("backCamFull");
-    const frontCamSmallVid = document.getElementById("frontCamSmall");
-    const countdownText = document.getElementById("countdownText");
-    const resultPhotoSpot = document.getElementById("resultPhotoSpot");
-    const polaroidHomeBtn = document.getElementById("polaroid-back-home");
-    const polaroidStartBtn = document.getElementById("polaroid-start-btn");
-    const polaroidLiveHome = document.getElementById("polaroid-live-home");
+  // 꼭짓점 + 숫자
+  for(let i=1;i<=count;i++){
+    const val = scoresObj[i] || 0;
+    const ratio = val / maxVal;
+    const r = maxR * ratio;
+    const ang = -Math.PI/2 + angleStep*(i-1);
+    const x = cx + Math.cos(ang)*r;
+    const y = cy + Math.sin(ang)*r;
 
-    let frontStream = null;
-    let backStream = null;
-    let captureFrontDataURL = null;
-    let captureBackDataURL = null;
-    let showingWhich = "front";
+    // 꼭짓점
+    ctx.beginPath();
+    ctx.arc(x,y,4.5,0,Math.PI*2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = topColor;
+    ctx.stroke();
 
-    polaroidHomeBtn.addEventListener("click", goHome);
-    polaroidLiveHome.addEventListener("click", goHome);
+    // 축 끝 숫자
+    const labelX = cx + Math.cos(ang)*(maxR+16);
+    const labelY = cy + Math.sin(ang)*(maxR+16);
+    ctx.fillStyle = TYPE_COLORS[i];
+    ctx.font = "11px 'Nanum Gothic', system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(i.toString(), labelX, labelY);
+  }
 
-    polaroidStartBtn.addEventListener("click", ()=>{
-      polaroidStartBtn.disabled = true;
-      polaroidStartBtn.textContent = "카메라 준비 중...";
-      startCameraAndCountdown();
-    });
+  // 설명 텍스트
+  if(topTypeDescEl){
+    topTypeDescEl.textContent = TYPE_DESC[topType] || `유형 ${topType} 성향이 가장 높아요.`;
+  }
 
-    async function startCameraAndCountdown(){
-      try{
-        frontStream = await navigator.mediaDevices.getUserMedia({
-          video:{facingMode:"user"},
-          audio:false
-        });
-        frontCamSmallVid.srcObject = frontStream;
+  // 점수 리스트
+  if(scoreListEl){
+    scoreListEl.innerHTML = "";
+    entries.forEach((item,idx)=>{
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.alignItems = "center";
+      row.style.gap = "6px";
 
-        try{
-          backStream = await navigator.mediaDevices.getUserMedia({
-            video:{facingMode:{ideal:"environment"}},
-            audio:false
-          });
-          backCamFullVideo.srcObject = backStream;
-        }catch(e){
-          console.warn("back cam fail", e);
-          if(!backStream && frontStream){
-            backCamFullVideo.srcObject = frontStream;
-          }
-        }
+      const dot = document.createElement("span");
+      dot.style.width = "11px";
+      dot.style.height = "11px";
+      dot.style.borderRadius = "50%";
+      dot.style.background = TYPE_COLORS[item.type];
+      row.appendChild(dot);
 
-        countdownText.style.display = "block";
-        startCountdownAndCapture(5);
-
-      }catch(err){
-        alert("카메라 권한을 허용해야 촬영할 수 있어요 🥲");
-        console.error(err);
-        polaroidStartBtn.disabled = false;
-        polaroidStartBtn.textContent = "카메라 다시 시도";
+      const span = document.createElement("span");
+      span.textContent = `유형 ${item.type} — ${item.score}점`;
+      if(idx===0){
+        span.style.fontWeight = "700";
+        span.style.color = "#d8463b";
       }
-    }
+      row.appendChild(span);
 
-    function stopStreams(){
-      if(frontStream){
-        frontStream.getTracks().forEach(t=>t.stop());
-        frontStream = null;
-      }
-      if(backStream){
-        backStream.getTracks().forEach(t=>t.stop());
-        backStream = null;
-      }
-    }
-
-    function grabFrame(videoEl){
-      if(!videoEl || !videoEl.srcObject) return null;
-      const track = videoEl.srcObject.getVideoTracks()[0];
-      const s = track.getSettings();
-      const w = s.width || videoEl.videoWidth || 640;
-      const h = s.height || videoEl.videoHeight || 480;
-      const c = document.createElement("canvas");
-      c.width = w; c.height = h;
-      c.getContext("2d").drawImage(videoEl,0,0,w,h);
-      return c.toDataURL("image/png");
-    }
-
-    function renderResultPhoto(which){
-      showingWhich = which;
-      const url = (which==="front") ? captureFrontDataURL : captureBackDataURL;
-      resultPhotoSpot.innerHTML = "";
-      const img = document.createElement("img");
-      img.src = url || "";
-      resultPhotoSpot.appendChild(img);
-    }
-
-    resultPhotoSpot.addEventListener("click", ()=>{
-      renderResultPhoto(showingWhich==="front" ? "back" : "front");
-    });
-
-    function doCaptureAndShowResult(){
-      captureFrontDataURL = grabFrame(frontCamSmallVid);
-      captureBackDataURL = grabFrame(backCamFullVideo);
-      liveStage.classList.add("hidden");
-      resultStage.classList.remove("hidden");
-      renderResultPhoto("front");
-      stopStreams();
-    }
-
-    function startCountdownAndCapture(sec){
-      let remain = sec;
-      countdownText.textContent = remain;
-      const timer = setInterval(()=>{
-        remain--;
-        countdownText.textContent = remain;
-        if(remain<=0){
-          clearInterval(timer);
-          doCaptureAndShowResult();
-        }
-      },1000);
-    }
-
-    // 버튼 연결
-    document.getElementById("go-cinema").addEventListener("click", ()=>{
-      showSection(viewCinema);
-      startCinema();
-    });
-    document.getElementById("go-room").addEventListener("click", ()=>{
-      showSection(viewRoom);
-    });
-    document.getElementById("go-polaroid").addEventListener("click", ()=>{
-      showSection(viewPolaroid);
-      // 이제는 여기서 바로 카메라 안 켜고, 버튼 눌러서 켜게 해둠
-    });
-    document.getElementById("result-home-btn").addEventListener("click", goHome);
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("polaroid-start-btn");
-  if (btn) {
-    btn.addEventListener("click", ()=>{
-      polaroidStartBtn.disabled = true;
-      polaroidStartBtn.textContent = "카메라 준비 중...";
-      startCameraAndCountdown();
+      scoreListEl.appendChild(row);
     });
   }
-});
+}
+
+function hexToRgba(hex, alpha){
+  const v = hex.replace("#","");
+  const r = parseInt(v.slice(0,2),16);
+  const g = parseInt(v.slice(2,4),16);
+  const b = parseInt(v.slice(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function showResult(){
+  showSection(viewResult);
+  drawRadarChart(scores);
+}
+
+  const liveStage=document.getElementById("polaroid-live-stage"); 
+  const resultStage=document.getElementById("polaroid-result-stage"); 
+  const backCamFullVideo=document.getElementById("backCamFull"); 
+  const frontCamSmallVid=document.getElementById("frontCamSmall"); 
+  const countdownText=document.getElementById("countdownText"); 
+  const resultPhotoSpot=document.getElementById("resultPhotoSpot"); 
+  const polaroidHomeBtn=document.getElementById("polaroid-back-home"); 
+  const polaroidStartBtn = document.getElementById("polaroid-start-btn"); 
+  const polaroidLiveHome = document.getElementById("polaroid-live-home"); 
+  polaroidLiveHome.addEventListener("click", goHome); 
+  // 카메라 시작 버튼 로직 
+  polaroidStartBtn.addEventListener(
+    "click", async () => { polaroidStartBtn.disabled = true; polaroidStartBtn.textContent = "카메라 준비 중..."; 
+    try { const constraintsFront = {
+       video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }, audio: false }; 
+              const constraintsBack = { video: { facingMode: { ideal: "environment" }, 
+              width: { ideal: 640 }, height: { ideal: 480 } }, audio: false }; 
+              
+          // 전면 카메라 요청 → 팝업 뜸 
+          frontStream = await navigator.mediaDevices.getUserMedia(constraintsFront); 
+          frontCamSmallVid.srcObject = frontStream; 
+          // 후면 카메라 (가능하면) 
+          try { backStream = await navigator.mediaDevices.getUserMedia(constraintsBack); 
+            backCamFullVideo.srcObject = backStream; 
+          } catch (e) { console.warn("back cam fail", e); 
+          if (!backStream && frontStream) backCamFullVideo.srcObject = frontStream; } 
+          // 카메라 준비되면 카운트다운 시작하기 위해 공통 함수 
+          function startCountdownWhenReady(videoEl) { if (!videoEl) return; 
+            // 비디오가 메타데이터를 읽으면 실제 크기/스트림이 준비된 거라서 
+            videoEl.onloadedmetadata = () => { startCountdownAndCapture(5); }; } 
+            async function initPolaroid(){
+              // 화면 전환 
+              liveStage.classList.remove("hidden"); 
+              resultStage.classList.add("hidden"); 
+              captureFrontDataURL = null; captureBackDataURL = null; 
+              showingWhich = "front"; 
+              // 1. 전면 카메라 먼저 
+              try { frontStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user" }, audio:false }); 
+              frontCamSmallVid.srcObject = frontStream; 
+              // 전면 쪽이라도 준비되면 그때부터 카운트다운 시작 
+              startCountdownWhenReady(frontCamSmallVid); } catch(e) { console.warn("front cam fail", e); } 
+              // 2. 후면 카메라(있으면)도 시도 
+              try { backStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ exact:"environment" } }, audio:false }); 
+              backCamFullVideo.srcObject = backStream; 
+              // 후면이 준비되면 이쪽으로도 시작 가능 (필요하면 이 줄 살려) // 
+              startCountdownWhenReady(backCamFullVideo); } catch(e) { console.warn("back cam fail, fallback", e); 
+              // 후면이 안 되면 전면을 전체배경으로 써 
+              if (!backStream && frontStream) { backCamFullVideo.srcObject = frontStream; } } } } catch (err) { alert("카메라 권한을 허용해야 촬영할 수 있습니다 🥲"); 
+              console.error(err); polaroidStartBtn.disabled = false; 
+              polaroidStartBtn.textContent = "카메라 다시 시도"; } }); 
+              let frontStream=null, backStream=null; 
+              let captureFrontDataURL=null, captureBackDataURL=null; 
+              let showingWhich="front"; polaroidHomeBtn.addEventListener("click",goHome); 
+              function stopStreams(){ if(frontStream){frontStream.getTracks().forEach(t=>t.stop());frontStream=null;} 
+              if(backStream){backStream.getTracks().forEach(t=>t.stop());backStream=null;} } 
+              function grabFrame(videoEl){ if(!videoEl || !videoEl.srcObject) 
+                return null; const track=videoEl.srcObject.getVideoTracks()[0]; 
+                const s=track.getSettings(); 
+                const w=s.width||videoEl.videoWidth||640; 
+                const h=s.height||videoEl.videoHeight||480; 
+                const c=document.createElement("canvas"); 
+                c.width=w;c.height=h; 
+                c.getContext("2d").drawImage(videoEl,0,0,w,h); 
+                return c.toDataURL("image/png"); 
+              } function renderResultPhoto(which){ 
+                showingWhich=which; const url=(which==="front")?captureFrontDataURL:captureBackDataURL; 
+                resultPhotoSpot.innerHTML=""; 
+                const img=document.createElement("img"); img.src=url||""; 
+                resultPhotoSpot.appendChild(img); 
+              } resultPhotoSpot.addEventListener("click",()=>{ renderResultPhoto(showingWhich==="front"?"back":"front"); }); 
+                function doCaptureAndShowResult(){ captureFrontDataURL=grabFrame(frontCamSmallVid); 
+                  captureBackDataURL=grabFrame(backCamFullVideo); 
+                  liveStage.classList.add("hidden"); 
+                  resultStage.classList.remove("hidden"); 
+                  renderResultPhoto("front"); stopStreams(); 
+                } function startCountdownAndCapture(sec){ let remain=sec; 
+                  countdownText.textContent=remain; 
+                  const timer=setInterval(()=>{ remain--; 
+                    countdownText.textContent=remain; 
+                    if(remain<=0){ clearInterval(timer); 
+                      doCaptureAndShowResult();
+                     } },1000); 
+                    } async function initPolaroid(){ liveStage.classList.remove("hidden"); 
+                    resultStage.classList.add("hidden"); 
+                    captureFrontDataURL=null;captureBackDataURL=null;
+                    showingWhich="front"; 
+                    try{ frontStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false}); frontCamSmallVid.srcObject=frontStream; 
+                  }catch(e){console.warn("front cam fail",e);} 
+                  try{ backStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:"environment"}},audio:false}); 
+                  backCamFullVideo.srcObject=backStream; 
+                }catch(e){ console.warn("back cam fail",e); 
+                if(!backStream && frontStream){backCamFullVideo.srcObject=frontStream;} 
+              } startCountdownAndCapture(5); } 
+              /* ---------------- 버튼 연결 ---------------- */
+               document.getElementById("go-cinema").addEventListener("click",()=>{ showSection(viewCinema);
+                startCinema(); }); 
+                document.getElementById("go-room").addEventListener("click",()=>{ showSection(viewRoom); }); 
+                document.getElementById("go-polaroid").addEventListener("click",()=>{ showSection(viewPolaroid);
+                  initPolaroid(); }); document.getElementById("result-home-btn").addEventListener("click",goHome);
 
   </script>
 </body>
