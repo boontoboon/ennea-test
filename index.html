@@ -897,99 +897,165 @@ function showResult(){
   drawRadarChart(scores);
 }
 
-  const liveStage=document.getElementById("polaroid-live-stage"); 
-  const resultStage=document.getElementById("polaroid-result-stage"); 
-  const backCamFullVideo=document.getElementById("backCamFull"); 
-  const frontCamSmallVid=document.getElementById("frontCamSmall"); 
-  const countdownText=document.getElementById("countdownText"); 
-  const resultPhotoSpot=document.getElementById("resultPhotoSpot"); 
-  const polaroidHomeBtn=document.getElementById("polaroid-back-home"); 
-  const polaroidStartBtn = document.getElementById("polaroid-start-btn"); 
-  const polaroidLiveHome = document.getElementById("polaroid-live-home"); 
-  polaroidLiveHome.addEventListener("click", goHome); 
-  // 카메라 시작 버튼 로직 
-  polaroidStartBtn.addEventListener(
-    "click", async () => { polaroidStartBtn.disabled = true; polaroidStartBtn.textContent = "카메라 준비 중..."; 
-    try { const constraintsFront = {
-       video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }, audio: false }; 
-              const constraintsBack = { video: { facingMode: { ideal: "environment" }, 
-              width: { ideal: 640 }, height: { ideal: 480 } }, audio: false }; 
-              
-          // 전면 카메라 요청 → 팝업 뜸 
-          frontStream = await navigator.mediaDevices.getUserMedia(constraintsFront); 
-          frontCamSmallVid.srcObject = frontStream; 
-          // 후면 카메라 (가능하면) 
-          try { backStream = await navigator.mediaDevices.getUserMedia(constraintsBack); 
-            backCamFullVideo.srcObject = backStream; 
-          } catch (e) { console.warn("back cam fail", e); 
-          if (!backStream && frontStream) backCamFullVideo.srcObject = frontStream; } 
-          // 카메라 준비되면 카운트다운 시작하기 위해 공통 함수 
-          function startCountdownWhenReady(videoEl) { if (!videoEl) return; 
-            // 비디오가 메타데이터를 읽으면 실제 크기/스트림이 준비된 거라서 
-            videoEl.onloadedmetadata = () => { startCountdownAndCapture(5); }; } 
-            async function initPolaroid(){
-              // 화면 전환 
-              liveStage.classList.remove("hidden"); 
-              resultStage.classList.add("hidden"); 
-              captureFrontDataURL = null; captureBackDataURL = null; 
-              showingWhich = "front"; 
-              // 1. 전면 카메라 먼저 
-              try { frontStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user" }, audio:false }); 
-              frontCamSmallVid.srcObject = frontStream; 
-              // 전면 쪽이라도 준비되면 그때부터 카운트다운 시작 
-              startCountdownWhenReady(frontCamSmallVid); } catch(e) { console.warn("front cam fail", e); } 
-              // 2. 후면 카메라(있으면)도 시도 
-              try { backStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ exact:"environment" } }, audio:false }); 
-              backCamFullVideo.srcObject = backStream; 
-              // 후면이 준비되면 이쪽으로도 시작 가능 (필요하면 이 줄 살려) // 
-              startCountdownWhenReady(backCamFullVideo); } catch(e) { console.warn("back cam fail, fallback", e); 
-              // 후면이 안 되면 전면을 전체배경으로 써 
-              if (!backStream && frontStream) { backCamFullVideo.srcObject = frontStream; } } } } catch (err) { alert("카메라 권한을 허용해야 촬영할 수 있습니다 🥲"); 
-              console.error(err); polaroidStartBtn.disabled = false; 
-              polaroidStartBtn.textContent = "카메라 다시 시도"; } }); 
-              let frontStream=null, backStream=null; 
-              let captureFrontDataURL=null, captureBackDataURL=null; 
-              let showingWhich="front"; polaroidHomeBtn.addEventListener("click",goHome); 
-              function stopStreams(){ if(frontStream){frontStream.getTracks().forEach(t=>t.stop());frontStream=null;} 
-              if(backStream){backStream.getTracks().forEach(t=>t.stop());backStream=null;} } 
-              function grabFrame(videoEl){ if(!videoEl || !videoEl.srcObject) 
-                return null; const track=videoEl.srcObject.getVideoTracks()[0]; 
-                const s=track.getSettings(); 
-                const w=s.width||videoEl.videoWidth||640; 
-                const h=s.height||videoEl.videoHeight||480; 
-                const c=document.createElement("canvas"); 
-                c.width=w;c.height=h; 
-                c.getContext("2d").drawImage(videoEl,0,0,w,h); 
-                return c.toDataURL("image/png"); 
-              } function renderResultPhoto(which){ 
-                showingWhich=which; const url=(which==="front")?captureFrontDataURL:captureBackDataURL; 
-                resultPhotoSpot.innerHTML=""; 
-                const img=document.createElement("img"); img.src=url||""; 
-                resultPhotoSpot.appendChild(img); 
-              } resultPhotoSpot.addEventListener("click",()=>{ renderResultPhoto(showingWhich==="front"?"back":"front"); }); 
-                function doCaptureAndShowResult(){ captureFrontDataURL=grabFrame(frontCamSmallVid); 
-                  captureBackDataURL=grabFrame(backCamFullVideo); 
-                  liveStage.classList.add("hidden"); 
-                  resultStage.classList.remove("hidden"); 
-                  renderResultPhoto("front"); stopStreams(); 
-                } function startCountdownAndCapture(sec){ let remain=sec; 
-                  countdownText.textContent=remain; 
-                  const timer=setInterval(()=>{ remain--; 
-                    countdownText.textContent=remain; 
-                    if(remain<=0){ clearInterval(timer); 
-                      doCaptureAndShowResult();
-                     } },1000); 
-                    } async function initPolaroid(){ liveStage.classList.remove("hidden"); 
-                    resultStage.classList.add("hidden"); 
-                    captureFrontDataURL=null;captureBackDataURL=null;
-                    showingWhich="front"; 
-                    try{ frontStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false}); frontCamSmallVid.srcObject=frontStream; 
-                  }catch(e){console.warn("front cam fail",e);} 
-                  try{ backStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:"environment"}},audio:false}); 
-                  backCamFullVideo.srcObject=backStream; 
-                }catch(e){ console.warn("back cam fail",e); 
-                if(!backStream && frontStream){backCamFullVideo.srcObject=frontStream;} 
-              } startCountdownAndCapture(5); } 
+/* ======== POLAROID ======== */
+const liveStage = document.getElementById("polaroid-live-stage");
+const resultStage = document.getElementById("polaroid-result-stage");
+const backCamFullVideo = document.getElementById("backCamFull");
+const frontCamSmallVid = document.getElementById("frontCamSmall");
+const countdownText = document.getElementById("countdownText");
+const resultPhotoSpot = document.getElementById("resultPhotoSpot");
+const polaroidHomeBtn = document.getElementById("polaroid-back-home");
+const polaroidStartBtn = document.getElementById("polaroid-start-btn");
+const polaroidLiveHome = document.getElementById("polaroid-live-home");
+
+// 스트림은 가장 위에서 한 번만 선언
+let frontStream = null;
+let backStream = null;
+let captureFrontDataURL = null;
+let captureBackDataURL = null;
+let showingWhich = "front";
+
+// 공통: 스트림 정리
+function stopStreams() {
+  if (frontStream) {
+    frontStream.getTracks().forEach(t => t.stop());
+    frontStream = null;
+  }
+  if (backStream) {
+    backStream.getTracks().forEach(t => t.stop());
+    backStream = null;
+  }
+}
+
+// 캡처용: 비디오에서 한 프레임 뽑기
+function grabFrame(videoEl) {
+  if (!videoEl || !videoEl.srcObject) return null;
+  // 준비가 덜 됐으면 그냥 null
+  if (videoEl.readyState < 2) return null;
+
+  const w = videoEl.videoWidth || 640;
+  const h = videoEl.videoHeight || 480;
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext("2d");
+  ctx.drawImage(videoEl, 0, 0, w, h);
+  return c.toDataURL("image/png");
+}
+
+// 결과 사진 보여주기
+function renderResultPhoto(which) {
+  showingWhich = which;
+  const url = which === "front" ? captureFrontDataURL : captureBackDataURL;
+  resultPhotoSpot.innerHTML = "";
+  const img = document.createElement("img");
+  img.src = url || "";
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "cover";
+  resultPhotoSpot.appendChild(img);
+}
+
+// 결과 화면으로 전환
+function doCaptureAndShowResult() {
+  // 딜레이 한 번 줘서 “살짝 지난 화면” 안 찍히게
+  requestAnimationFrame(() => {
+    captureFrontDataURL = grabFrame(frontCamSmallVid);
+    captureBackDataURL = grabFrame(backCamFullVideo);
+
+    liveStage.classList.add("hidden");
+    resultStage.classList.remove("hidden");
+    renderResultPhoto("front");
+    stopStreams(); // 찍었으니 끔
+  });
+}
+
+// 5초 카운트다운
+function startCountdownAndCapture(sec) {
+  let remain = sec;
+  countdownText.style.display = "block";
+  countdownText.textContent = remain;
+  const timer = setInterval(() => {
+    remain--;
+    countdownText.textContent = remain;
+    if (remain <= 0) {
+      clearInterval(timer);
+      countdownText.style.display = "none";
+      doCaptureAndShowResult();
+    }
+  }, 1000);
+}
+
+// 실제 카메라 여는 함수
+async function openCamerasAndStart() {
+  try {
+    // 1) 전면
+    frontStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" },
+      audio: false
+    });
+    frontCamSmallVid.srcObject = frontStream;
+    frontCamSmallVid.play().catch(()=>{});
+
+    // 2) 후면 (안 되면 전면으로 대체)
+    try {
+      backStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false
+      });
+      backCamFullVideo.srcObject = backStream;
+      backCamFullVideo.play().catch(()=>{});
+    } catch (e) {
+      console.warn("back cam not available, use front as background", e);
+      if (frontStream) {
+        backCamFullVideo.srcObject = frontStream;
+        backCamFullVideo.play().catch(()=>{});
+      }
+    }
+
+    // 여기까지 오면 준비된 거니까 카운트다운 시작
+    startCountdownAndCapture(5);
+
+  } catch (err) {
+    alert("카메라 권한을 허용해야 촬영할 수 있어요 🥲");
+    console.error(err);
+    polaroidStartBtn.disabled = false;
+    polaroidStartBtn.textContent = "카메라 다시 시도";
+  }
+}
+
+// 폴라로이드 화면 들어올 때 초기화 (카메라까지는 안 켬)
+function initPolaroidView() {
+  liveStage.classList.remove("hidden");
+  resultStage.classList.add("hidden");
+  captureFrontDataURL = null;
+  captureBackDataURL = null;
+  showingWhich = "front";
+  countdownText.style.display = "none";
+  polaroidStartBtn.disabled = false;
+  polaroidStartBtn.textContent = "카메라 켜기";
+}
+
+// 클릭 이벤트들
+polaroidStartBtn.addEventListener("click", () => {
+  polaroidStartBtn.disabled = true;
+  polaroidStartBtn.textContent = "카메라 준비 중...";
+  openCamerasAndStart();
+});
+polaroidHomeBtn.addEventListener("click", goHome);
+polaroidLiveHome.addEventListener("click", goHome);
+
+// 결과 사진 터치하면 전/후면 전환
+resultPhotoSpot.addEventListener("click", () => {
+  renderResultPhoto(showingWhich === "front" ? "back" : "front");
+});
+
+// 기존 메뉴에서 “폴라로이드” 눌렀을 때 이걸 호출하도록 해놔야 함
+// document.getElementById("go-polaroid").addEventListener("click", () => {
+//   showSection(viewPolaroid);
+//   initPolaroidView();
+// });
+
               /* ---------------- 버튼 연결 ---------------- */
                document.getElementById("go-cinema").addEventListener("click",()=>{ showSection(viewCinema);
                 startCinema(); }); 
